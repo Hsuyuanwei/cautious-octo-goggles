@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1A2B (Bulls and Cows) Game</title>
+    <title>猜数字游戏 (1A2B)</title>
     <style>
         #guess-log {
             margin-top: 15px;
@@ -20,110 +20,111 @@
     </style>
 </head>
 <body>
-    <h1>🔢 1A2B Guessing Game</h1>
-    <div id="message"></div>
+    <h1>🔢 猜数字游戏 (1A2B)</h1>
+    <p id="message">请点击“开始新游戏”按钮。</p>
     
-    <input type="number" id="input" placeholder="Enter your 4-digit guess" maxlength="4">
-    <button onclick="checkGuess()">Enter Guess</button> 
-    <button onclick="startGame()">Start New Game</button> 
+    <input type="number" id="input" placeholder="输入您的四位数字猜測 (例: 1234)" maxlength="4">
+    <button onclick="checkGuess()">猜測</button> 
+    <button onclick="startGame()">开始新游戏</button> 
 
-    <h3>Guess History:</h3>
+    <h3>猜測记录:</h3>
     <div id="guess-log"></div>
     
     <script>
-        // Global variables
+        // 全局变量
         let secretNumber = '';
         let guessCount = 0;
 
-        // Function to generate a 4-digit number with unique digits (from previous response)
+        // 【目标数字生成函数】 生成一个四位且数字不重复的秘密数字
+        // 经典 1A2B 玩法要求目标数字不重复
         function generateUniqueNumber() {
             let digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
             let numberArray = [];
 
-            // Shuffle the digits array
+            // 1. 洗牌：打乱数组顺序
             for (let i = digits.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [digits[i], digits[j]] = [digits[j], digits[i]];
             }
 
-            // Take the first four shuffled digits
+            // 2. 取前四位作为秘密数字
             numberArray = digits.slice(0, 4);
 
-            // Ensure the number does not start with '0'
+            // 3. 确保第一位不是 '0'，否则数字不足四位
             if (numberArray[0] === '0') {
                  [numberArray[0], numberArray[3]] = [numberArray[3], numberArray[0]];
             }
 
             secretNumber = numberArray.join('');
-            // console.log("The secret number is: " + secretNumber); // Keep this commented out for cheating!
+            console.log("秘密数字已生成");
         }
 
-        // Function to initialize or restart the game
+        // 初始化或重新开始游戏
         function startGame() {
             generateUniqueNumber();
             guessCount = 0;
-            document.getElementById('message').textContent = 'A new 4-digit secret number has been generated. Guess it!';
-            document.getElementById('guess-log').innerHTML = ''; // Clear history
-            document.getElementById('input').value = ''; // Clear input
+            document.getElementById('message').textContent = '一个新的四位秘密数字已生成，请开始猜測！';
+            document.getElementById('guess-log').innerHTML = ''; // 清空历史记录
+            document.getElementById('input').value = ''; // 清空输入框
+            document.getElementById('input').disabled = false; // 启用输入
         }
 
-        // The core logic to check the guess against the secret number
+        // 检查猜測的核心逻辑
         function checkGuess() {
             const inputElement = document.getElementById('input');
             const guess = inputElement.value;
             const logElement = document.getElementById('guess-log');
             const messageElement = document.getElementById('message');
 
-            // --- Validation Checks ---
-            if (guess.length !== 4 || isNaN(guess) || (new Set(guess.split('')).size !== 4)) {
-                alert("Please enter a valid 4-digit number with unique digits.");
+            // --- 验证检查 ---
+            if (guess.length !== 4 || isNaN(guess)) {
+                alert("请输入一个有效的四位数字！");
                 return;
             }
 
             if (!secretNumber) {
-                alert("Please start a new game first!");
+                alert("请先点击 '开始新游戏' 按钮！");
                 return;
             }
             
             guessCount++;
 
-            let bulls = 0; // Correct digit, correct position ('A')
-            let cows = 0;  // Correct digit, wrong position ('B')
+            let bulls = 0; // 位置和数字都正确 ('A')
+            let cows = 0;  // 数字正确但位置错误 ('B')
 
-            // --- Calculation Logic ---
+            // --- 计算逻辑 ---
+            // 经典的 1A2B 算法，基于秘密数字不重复，但允许猜測重复
             for (let i = 0; i < 4; i++) {
-                // Check for Bulls
+                // 1. 检查 Bulls (A)
                 if (guess[i] === secretNumber[i]) {
                     bulls++;
                 } else {
-                    // Check for Cows (The digit is in the secret number, but not at this position)
+                    // 2. 检查 Cows (B)
                     if (secretNumber.includes(guess[i])) {
                         cows++;
                     }
                 }
             }
 
-            // --- Display Result ---
+            // --- 显示结果 ---
             const result = `${bulls}A${cows}B`;
             const logEntry = document.createElement('p');
-            logEntry.textContent = `[${guessCount}] Your guess: ${guess} -> Result: ${result}`;
+            logEntry.textContent = `[${guessCount} 次] 您的猜測: ${guess} -> 结果: ${result}`;
 
-            // Check for Win condition
+            // 检查胜利条件
             if (bulls === 4) {
                 logEntry.classList.add('correct');
-                messageElement.textContent = `🎉 Congratulations! You guessed the secret number (${secretNumber}) in ${guessCount} attempts!`;
-                
-                // You might want to disable the input/button here until a new game is started
-                // inputElement.disabled = true; 
+                messageElement.textContent = `🎉 恭喜！您在 ${guessCount} 次猜測中猜中了秘密数字 (${secretNumber})！`;
+                inputElement.disabled = true; // 胜利后禁用输入
             } else {
-                messageElement.textContent = 'Keep going! Try another guess.';
+                messageElement.textContent = `再试一次！结果是 ${result}。`;
             }
 
-            logElement.prepend(logEntry); // Add the new entry to the top
-            inputElement.value = ''; // Clear the input field for the next guess
+            logElement.prepend(logEntry); // 将新记录添加到顶部
+            inputElement.value = ''; // 清空输入框
         }
 
-        // Start the game automatically when the page loads
+        // 页面加载时自动启动游戏
         window.onload = startGame;
     </script>
 </body>
