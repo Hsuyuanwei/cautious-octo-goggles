@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div></div>
+    <input type="number" id="input">
+    <button onclick="">enter</button>
+    
+    <script>
+        ans = 0;
+        function br(){
+            ans = Math.floor(Math.random() * 9999);
+            ans1 = Math.floor(ans/1000);
+            ans2 = (ans-1000*ans1)/100;
+            ans3 = (ans-1000*ans1-100*ans2)/10;
+            ans4 = (ans-1000*ans1-100*ans2-10*ans3);
+            if(an1==ans2||ans1==ans3||ans1==ans4||ans2==ans3||ans2==ans4||ans3==ans4){
+                br();
+            }
+        }
+        console.log(ans);
+    </script>
+</body>
+</html>
