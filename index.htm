@@ -3,26 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>1A2B (Bulls and Cows) Game</title>
+    <style>
+        #guess-log {
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            height: 200px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <div></div>
-    <input type="number" id="input">
-    <button onclick="">enter</button>
+    <h1>🔢 1A2B Guessing Game</h1>
+    <div id="message"></div>
+    
+    <input type="number" id="input" placeholder="Enter your 4-digit guess" maxlength="4">
+    <button onclick="checkGuess()">Enter Guess</button> 
+    <button onclick="startGame()">Start New Game</button> 
+
+    <h3>Guess History:</h3>
+    <div id="guess-log"></div>
     
     <script>
-        ans = 0;
-        function br(){
-            ans = Math.floor(Math.random() * 9999);
-            ans1 = Math.floor(ans/1000);
-            ans2 = (ans-1000*ans1)/100;
-            ans3 = (ans-1000*ans1-100*ans2)/10;
-            ans4 = (ans-1000*ans1-100*ans2-10*ans3);
-            if(an1==ans2||ans1==ans3||ans1==ans4||ans2==ans3||ans2==ans4||ans3==ans4){
-                br();
+        // Global variables
+        let secretNumber = '';
+        let guessCount = 0;
+
+        // Function to generate a 4-digit number with unique digits (from previous response)
+        function generateUniqueNumber() {
+            let digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            let numberArray = [];
+
+            // Shuffle the digits array
+            for (let i = digits.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [digits[i], digits[j]] = [digits[j], digits[i]];
             }
+
+            // Take the first four shuffled digits
+            numberArray = digits.slice(0, 4);
+
+            // Ensure the number does not start with '0'
+            if (numberArray[0] === '0') {
+                 [numberArray[0], numberArray[3]] = [numberArray[3], numberArray[0]];
+            }
+
+            secretNumber = numberArray.join('');
+            // console.log("The secret number is: " + secretNumber); // Keep this commented out for cheating!
         }
-        console.log(ans);
+
+        // Function to initialize or restart the game
+        function startGame() {
+            generateUniqueNumber();
+            guessCount = 0;
+            document.getElementById('message').textContent = 'A new 4-digit secret number has been generated. Guess it!';
+            document.getElementById('guess-log').innerHTML = ''; // Clear history
+            document.getElementById('input').value = ''; // Clear input
+        }
+
+        // The core logic to check the guess against the secret number
+        function checkGuess() {
+            const inputElement = document.getElementById('input');
+            const guess = inputElement.value;
+            const logElement = document.getElementById('guess-log');
+            const messageElement = document.getElementById('message');
+
+            // --- Validation Checks ---
+            if (guess.length !== 4 || isNaN(guess) || (new Set(guess.split('')).size !== 4)) {
+                alert("Please enter a valid 4-digit number with unique digits.");
+                return;
+            }
+
+            if (!secretNumber) {
+                alert("Please start a new game first!");
+                return;
+            }
+            
+            guessCount++;
+
+            let bulls = 0; // Correct digit, correct position ('A')
+            let cows = 0;  // Correct digit, wrong position ('B')
+
+            // --- Calculation Logic ---
+            for (let i = 0; i < 4; i++) {
+                // Check for Bulls
+                if (guess[i] === secretNumber[i]) {
+                    bulls++;
+                } else {
+                    // Check for Cows (The digit is in the secret number, but not at this position)
+                    if (secretNumber.includes(guess[i])) {
+                        cows++;
+                    }
+                }
+            }
+
+            // --- Display Result ---
+            const result = `${bulls}A${cows}B`;
+            const logEntry = document.createElement('p');
+            logEntry.textContent = `[${guessCount}] Your guess: ${guess} -> Result: ${result}`;
+
+            // Check for Win condition
+            if (bulls === 4) {
+                logEntry.classList.add('correct');
+                messageElement.textContent = `🎉 Congratulations! You guessed the secret number (${secretNumber}) in ${guessCount} attempts!`;
+                
+                // You might want to disable the input/button here until a new game is started
+                // inputElement.disabled = true; 
+            } else {
+                messageElement.textContent = 'Keep going! Try another guess.';
+            }
+
+            logElement.prepend(logEntry); // Add the new entry to the top
+            inputElement.value = ''; // Clear the input field for the next guess
+        }
+
+        // Start the game automatically when the page loads
+        window.onload = startGame;
     </script>
 </body>
 </html>
